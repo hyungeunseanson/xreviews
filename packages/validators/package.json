@@ -11,6 +11,7 @@
     "lint": "tsc --noEmit --project tsconfig.json"
   },
   "dependencies": {
+    "@xreviews/shared": "workspace:*",
     "zod": "4.4.3"
   },
   "devDependencies": {

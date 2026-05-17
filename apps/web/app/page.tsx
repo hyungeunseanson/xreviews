@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   categoryCards,
   heroCopy,
@@ -25,12 +26,12 @@ export default function HomePage() {
             {heroCopy.description}
           </p>
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-            <a
+            <Link
               className="inline-flex h-12 items-center justify-center bg-ink px-6 text-sm font-bold text-paper transition hover:bg-neutral-800"
-              href="#search"
+              href="/subjects"
             >
               {heroCopy.primaryCta}
-            </a>
+            </Link>
             <button
               aria-disabled="true"
               className="inline-flex h-12 cursor-not-allowed items-center justify-center border border-neutral-400 px-6 text-sm font-bold text-neutral-500"
@@ -68,21 +69,23 @@ export default function HomePage() {
                 병원, 부동산, 카센터의 불만을 검색해보세요.
               </p>
             </div>
-            <form className="flex flex-col gap-3 sm:flex-row" role="search">
+            <form
+              action="/subjects"
+              className="flex flex-col gap-3 sm:flex-row"
+              role="search"
+            >
               <input
                 aria-label="불만 검색어"
                 className="h-12 flex-1 border border-neutral-400 bg-paper px-4 text-base text-ink outline-none placeholder:text-neutral-500 focus:border-ink"
+                name="q"
                 placeholder="병원, 부동산, 카센터 검색"
-                readOnly
                 type="search"
               />
               <button
-                aria-disabled="true"
-                className="h-12 cursor-not-allowed bg-neutral-300 px-6 text-sm font-bold text-neutral-600"
-                disabled
-                type="button"
+                className="h-12 bg-ink px-6 text-sm font-bold text-paper transition hover:bg-neutral-800"
+                type="submit"
               >
-                검색 준비 중
+                검색
               </button>
             </form>
           </div>
@@ -98,8 +101,9 @@ export default function HomePage() {
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           {categoryCards.map((category) => (
-            <article
+            <Link
               className="min-h-56 border border-line p-5 transition hover:border-ink"
+              href={`/subjects?category=${category.id}`}
               key={category.id}
             >
               <p className="text-xs font-black uppercase text-neutral-500">
@@ -109,7 +113,7 @@ export default function HomePage() {
               <p className="mt-4 text-base font-semibold leading-7 text-neutral-700">
                 {category.problems}
               </p>
-            </article>
+            </Link>
           ))}
         </div>
       </section>

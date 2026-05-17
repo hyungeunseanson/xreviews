@@ -1,9 +1,13 @@
+import { config as loadEnv } from "dotenv";
 import { createDb } from "./client";
 import {
   riskTags,
   subjectCategories,
   subjectCategoryRiskTags
 } from "./schema";
+
+loadEnv({ path: ".env.local", override: false, quiet: true });
+loadEnv({ override: false, quiet: true });
 
 const categories = [
   {

@@ -60,6 +60,11 @@ const trustedOrigins = Array.from(
 );
 
 const db = createDb(getDatabaseUrl());
+const adapterSchema = {
+  ...dbSchema,
+  ...betterAuthCoreTables,
+  verification_tokens: dbSchema.verificationTokens
+};
 
 export const auth = betterAuth({
   appName: "Xreviews",
@@ -68,10 +73,7 @@ export const auth = betterAuth({
   trustedOrigins,
   database: drizzleAdapter(db, {
     provider: "pg",
-    schema: {
-      ...dbSchema,
-      ...betterAuthCoreTables
-    }
+    schema: adapterSchema
   }),
   user: {
     modelName: "users",

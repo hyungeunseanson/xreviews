@@ -3,8 +3,9 @@ import { signOut } from "@/app/auth/actions";
 import { getCurrentSession } from "@/server/session";
 
 const navItems = [
-  { label: "검색", href: "/#search" },
+  { label: "검색", href: "/subjects" },
   { label: "카테고리", href: "/#categories" },
+  { label: "대상 등록", href: "/subjects/new" },
   { label: "원칙", href: "/#product-rules" }
 ] as const;
 

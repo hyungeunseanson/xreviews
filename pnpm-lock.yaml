@@ -44,6 +44,9 @@ importers:
       better-auth:
         specifier: 1.6.11
         version: 1.6.11(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@neondatabase/serverless@1.1.0)(kysely@0.28.17))(next@16.2.6(@babel/core@7.29.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      drizzle-orm:
+        specifier: 0.45.2
+        version: 0.45.2(@neondatabase/serverless@1.1.0)(kysely@0.28.17)
       next:
         specifier: 16.2.6
         version: 16.2.6(@babel/core@7.29.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -72,6 +75,9 @@ importers:
       '@types/react-dom':
         specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.14)
+      dotenv:
+        specifier: 17.4.2
+        version: 17.4.2
       eslint:
         specifier: 9.39.4
         version: 9.39.4(jiti@2.7.0)
@@ -113,6 +119,9 @@ importers:
       '@types/node':
         specifier: 25.8.0
         version: 25.8.0
+      dotenv:
+        specifier: 17.4.2
+        version: 17.4.2
       tsx:
         specifier: 4.22.1
         version: 4.22.1
@@ -128,6 +137,9 @@ importers:
 
   packages/validators:
     dependencies:
+      '@xreviews/shared':
+        specifier: workspace:*
+        version: link:../shared
       zod:
         specifier: 4.4.3
         version: 4.4.3
