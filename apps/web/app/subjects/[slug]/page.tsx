@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getPublishedReviewsBySubject } from "@/server/reviews";
 import { getSubjectBySlugOrId, getSubjectRiskTags } from "@/server/subjects";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,7 @@ type SubjectDetailPageProps = {
   searchParams?: Promise<{
     created?: string;
     duplicate?: string;
+    review?: string;
   }>;
 };
 
@@ -25,7 +27,10 @@ export default async function SubjectDetailPage({
     notFound();
   }
 
-  const riskTags = await getSubjectRiskTags(subject.category);
+  const [riskTags, publishedReviews] = await Promise.all([
+    getSubjectRiskTags(subject.category),
+    getPublishedReviewsBySubject(subject.id)
+  ]);
 
   return (
     <main className="min-h-screen bg-paper text-ink">
@@ -39,6 +44,12 @@ export default async function SubjectDetailPage({
           {query?.duplicate === "1" ? (
             <p className="mb-6 border-l-4 border-ink bg-paper px-4 py-3 text-sm font-bold leading-6 text-neutral-700">
               이미 등록된 대상이 있어 기존 페이지로 안내합니다.
+            </p>
+          ) : null}
+          {query?.review === "pending" ? (
+            <p className="mb-6 border-l-4 border-ink bg-paper px-4 py-3 text-sm font-bold leading-6 text-neutral-700">
+              불만이 접수되었습니다. 관리자 검토 후 공개됩니다. Xreviews는
+              승인 전 리뷰를 공개하지 않습니다.
             </p>
           ) : null}
 
@@ -101,11 +112,47 @@ export default async function SubjectDetailPage({
           </section>
 
           <section className="border border-line p-6">
-            <h2 className="text-2xl font-black">아직 공개된 불만이 없습니다.</h2>
-            <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-neutral-700">
-              좋은 리뷰가 없다는 뜻이 아닙니다. 아직 검토를 통과한 불만이
-              없다는 뜻입니다.
-            </p>
+            <h2 className="text-2xl font-black">
+              {publishedReviews.length > 0
+                ? "공개된 불만"
+                : "아직 공개된 불만이 없습니다."}
+            </h2>
+            {publishedReviews.length === 0 ? (
+              <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-neutral-700">
+                좋은 리뷰가 없다는 뜻이 아닙니다. 아직 검토를 통과한 불만이
+                없다는 뜻입니다.
+              </p>
+            ) : (
+              <div className="mt-5 divide-y divide-line border-y border-line">
+                {publishedReviews.map((review) => (
+                  <article className="py-5" key={review.id}>
+                    <div className="flex flex-wrap gap-2">
+                      {review.tags.map((tag) => (
+                        <span
+                          className="border border-line px-2 py-1 text-xs font-bold text-neutral-600"
+                          key={tag.id}
+                        >
+                          {tag.labelKo}
+                        </span>
+                      ))}
+                    </div>
+                    <h3 className="mt-3 text-xl font-black">{review.title}</h3>
+                    {review.issueSummary ? (
+                      <p className="mt-2 text-base font-bold leading-7 text-neutral-700">
+                        {review.issueSummary}
+                      </p>
+                    ) : null}
+                    <p className="mt-3 line-clamp-4 text-sm font-semibold leading-6 text-neutral-600">
+                      {review.body}
+                    </p>
+                    <p className="mt-4 text-xs font-black uppercase text-neutral-500">
+                      문제 강도 {review.severityScore} · 증거 수준{" "}
+                      {review.evidenceLevel}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            )}
           </section>
         </div>
 
@@ -122,17 +169,15 @@ export default async function SubjectDetailPage({
             </p>
           </div>
 
-          <button
-            aria-disabled="true"
-            className="h-12 w-full cursor-not-allowed bg-neutral-300 px-6 text-sm font-bold text-neutral-600"
-            disabled
-            type="button"
+          <Link
+            className="inline-flex h-12 w-full items-center justify-center bg-ink px-6 text-sm font-bold text-paper transition hover:bg-neutral-800"
+            href={`/subjects/${encodeURIComponent(subject.slug)}/reviews/new`}
           >
             이 대상의 불만 작성하기
-          </button>
+          </Link>
           <p className="text-sm font-semibold leading-6 text-neutral-600">
-            불만 작성은 Phase 4에서 열립니다. 이번 Phase에서는 대상 조회만
-            가능합니다.
+            작성된 불만은 pending 상태로 저장되고, 검토 전에는 공개되지
+            않습니다.
           </p>
 
           <Link

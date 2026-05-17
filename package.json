@@ -13,6 +13,7 @@
     "db:push": "drizzle-kit push --config drizzle.config.ts",
     "db:seed": "tsx packages/db/src/seed.ts",
     "db:studio": "drizzle-kit studio --config drizzle.config.ts",
+    "admin:promote": "tsx apps/web/scripts/promote-admin.ts",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint"
   },

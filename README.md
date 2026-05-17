@@ -10,13 +10,17 @@ Xreviews는 긍정 리뷰를 받지 않는 부정 경험 전용 리뷰 플랫폼
 
 ## Phase 상태
 
-현재 repo는 Phase 2까지 완료된 상태입니다.
+현재 repo는 Phase 6 구현 단계입니다.
 
 - Phase 0: Cloudflare 배포 전제 TypeScript/Next.js App Router scaffold
 - Phase 1: Neon Postgres + Drizzle ORM 핵심 DB schema/migration/seed 구조
 - Phase 2: BetterAuth + Resend 기반 magic link 인증 구조
+- Phase 3: subject 생성/검색/상세 skeleton
+- Phase 4: 부정 경험 전용 불만 작성/검증/pending 저장
+- Phase 5: Cloudflare R2 private evidence upload flow
+- Phase 6: 관리자 모더레이션 큐와 review status 전환
 
-아직 리뷰 작성, subject 생성, R2 업로드, 관리자 모더레이션, 사업자 claim, 랭킹, 결제 기능은 구현하지 않았습니다.
+아직 사업자 claim, 사업자 답변, 랭킹, 결제, Qdrant, AI 요약 기능은 구현하지 않았습니다.
 
 ## Stack
 
@@ -57,9 +61,12 @@ pnpm lint
 pnpm build
 pnpm cf:build
 pnpm deploy
+pnpm admin:promote --email=admin@example.com
 ```
 
 `pnpm deploy`는 Cloudflare 계정, `wrangler` 로그인, production 환경변수, R2 bucket 준비 후 실행합니다.
+
+`pnpm admin:promote`는 개발/운영 점검용 CLI입니다. 웹 UI에서 admin 승격 기능을 만들지 않으며, production에서는 승인된 운영 절차 안에서만 사용해야 합니다.
 
 ## Environment
 
