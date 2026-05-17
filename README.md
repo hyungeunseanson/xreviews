@@ -1,0 +1,66 @@
+# Xreviews
+
+Xreviews는 긍정 리뷰를 받지 않는 부정 경험 전용 리뷰 플랫폼입니다.
+
+핵심 출발점:
+
+> 혹시 리뷰 볼 때, 1점부터 보시나요?
+
+좋은 후기는 이미 충분합니다. Xreviews는 사람들이 먼저 찾는 나쁜 후기만 모읍니다.
+
+## Phase 0 상태
+
+현재 repo는 Cloudflare 배포를 전제로 한 TypeScript/Next.js App Router MVP scaffold입니다. 아직 DB schema, 인증, 리뷰 작성, R2 업로드, 관리자, 사업자, 랭킹 기능은 구현하지 않았습니다.
+
+## Stack
+
+- TypeScript
+- Next.js App Router
+- Tailwind CSS
+- Cloudflare Workers/Pages via OpenNext Cloudflare adapter
+- Neon Postgres, Drizzle ORM, BetterAuth, Resend, R2 in later phases
+- Sentry, GA4, Microsoft Clarity placeholders
+
+금지 스택:
+
+- Vercel
+- Supabase
+- Pinecone
+
+## Local setup
+
+pnpm이 없으면 Corepack으로 활성화합니다.
+
+```bash
+corepack prepare pnpm@10.33.4 --activate
+pnpm install
+pnpm dev
+```
+
+웹 앱은 기본적으로 `http://localhost:3000`에서 실행됩니다.
+
+## Commands
+
+```bash
+pnpm typecheck
+pnpm lint
+pnpm build
+pnpm cf:build
+pnpm deploy
+```
+
+`pnpm deploy`는 Cloudflare 계정, `wrangler` 로그인, production 환경변수, R2 bucket 준비 후 실행합니다.
+
+## Environment
+
+루트의 `.env.example`을 참고해 로컬 `.env.local`을 만들 수 있습니다. Phase 0에서는 env가 비어 있어도 로컬 화면이 죽지 않도록 설계되어 있습니다. Production 검증은 `packages/config/env.ts`의 `validateProductionEnv()`가 명확한 에러를 내도록 분리되어 있습니다.
+
+## Product rules
+
+- Xreviews는 긍정 리뷰를 받지 않습니다.
+- “1점부터 본다”는 기존 플랫폼에서의 사용자 행동을 설명하는 카피이며, Xreviews 자체에는 별점 UI가 없습니다.
+- MVP 카테고리는 `medical_clinic`, `real_estate`, `auto_repair`만 허용합니다.
+- 인물 리뷰 대상은 만들지 않습니다.
+- 신규 리뷰는 승인 전까지 공개되지 않습니다.
+- 사업자는 리뷰를 삭제할 수 없습니다.
+- 증거 파일은 private-by-default입니다.

@@ -1,0 +1,20 @@
+name = "xreviews-web"
+main = ".open-next/worker.js"
+compatibility_date = "2026-05-01"
+compatibility_flags = ["nodejs_compat"]
+
+assets = { directory = ".open-next/assets", binding = "ASSETS" }
+
+# This is a reference file. apps/web/wrangler.toml is the Phase 0 app config.
+
+[vars]
+APP_NAME = "Xreviews"
+
+[[r2_buckets]]
+binding = "EVIDENCE_BUCKET"
+bucket_name = "xreviews-evidence-prod"
+
+# Optional later
+# [[queues.producers]]
+# queue = "xreviews-jobs"
+# binding = "JOBS_QUEUE"

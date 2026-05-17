@@ -1,0 +1,28 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@xreviews/config": ["../../packages/config/index.ts"],
+      "@xreviews/config/*": ["../../packages/config/*"],
+      "@xreviews/db": ["../../packages/db/src/index.ts"],
+      "@xreviews/db/*": ["../../packages/db/src/*"],
+      "@xreviews/shared": ["../../packages/shared/index.ts"],
+      "@xreviews/shared/*": ["../../packages/shared/*"],
+      "@xreviews/validators": ["../../packages/validators/index.ts"],
+      "@xreviews/validators/*": ["../../packages/validators/*"]
+    },
+    "plugins": [{ "name": "next" }],
+    "incremental": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "next.config.ts",
+    "open-next.config.ts"
+  ],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@xreviews/config": ["packages/config/index.ts"],
+      "@xreviews/config/*": ["packages/config/*"],
+      "@xreviews/db": ["packages/db/src/index.ts"],
+      "@xreviews/db/*": ["packages/db/src/*"],
+      "@xreviews/shared": ["packages/shared/index.ts"],
+      "@xreviews/shared/*": ["packages/shared/*"],
+      "@xreviews/validators": ["packages/validators/index.ts"],
+      "@xreviews/validators/*": ["packages/validators/*"]
+    }
+  },
+  "exclude": ["node_modules", ".next", ".open-next", "dist"]
+}

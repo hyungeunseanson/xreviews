@@ -1,0 +1,28 @@
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import { ObservabilityPlaceholders } from "@/components/observability-placeholders";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Xreviews",
+  description:
+    "Xreviews는 사람들이 먼저 찾는 나쁜 후기와 불만만 모으는 부정 경험 전용 리뷰 플랫폼입니다.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  )
+};
+
+export default function RootLayout({
+  children
+}: Readonly<{
+  children: ReactNode;
+}>) {
+  return (
+    <html lang="ko">
+      <body>
+        <ObservabilityPlaceholders />
+        {children}
+      </body>
+    </html>
+  );
+}

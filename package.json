@@ -1,0 +1,25 @@
+{
+  "name": "xreviews",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.33.4",
+  "scripts": {
+    "dev": "pnpm --filter @xreviews/web dev",
+    "build": "pnpm --filter @xreviews/web build",
+    "cf:build": "pnpm --filter @xreviews/web cf:build",
+    "deploy": "pnpm --filter @xreviews/web deploy",
+    "db:generate": "drizzle-kit generate --config drizzle.config.ts",
+    "db:migrate": "drizzle-kit migrate --config drizzle.config.ts",
+    "db:push": "drizzle-kit push --config drizzle.config.ts",
+    "db:seed": "tsx packages/db/src/seed.ts",
+    "db:studio": "drizzle-kit studio --config drizzle.config.ts",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint"
+  },
+  "devDependencies": {
+    "dotenv": "17.4.2",
+    "drizzle-kit": "0.31.10",
+    "tsx": "4.22.1",
+    "typescript": "6.0.3"
+  }
+}
