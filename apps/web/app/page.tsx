@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   categoryCards,
   heroCopy,
@@ -7,30 +6,9 @@ import {
 } from "@xreviews/shared/copy";
 import { PRODUCT_RULES } from "@xreviews/shared/constants";
 
-const navItems = ["검색", "카테고리", "공식계정"];
-
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-paper text-ink">
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
-        <Link className="text-lg font-black tracking-normal" href="/">
-          Xreviews
-        </Link>
-        <nav aria-label="Main navigation" className="hidden gap-7 text-sm sm:flex">
-          {navItems.map((item) => (
-            <a className="text-neutral-700 transition hover:text-ink" href="#search" key={item}>
-              {item}
-            </a>
-          ))}
-        </nav>
-        <a
-          className="border border-ink px-4 py-2 text-sm font-semibold transition hover:bg-ink hover:text-paper"
-          href="#product-rules"
-        >
-          원칙 보기
-        </a>
-      </header>
-
       <section className="mx-auto grid min-h-[calc(100vh-84px)] w-full max-w-6xl content-center px-5 pb-16 pt-10 sm:px-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14">
         <div className="flex flex-col justify-center">
           <p className="mb-5 max-w-2xl text-base font-semibold text-neutral-600">
@@ -111,7 +89,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
+      <section className="mx-auto max-w-6xl px-5 py-16 sm:px-8" id="categories">
         <div className="mb-8 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
           <h2 className="text-3xl font-black">MVP Categories</h2>
           <p className="max-w-xl text-sm font-semibold leading-6 text-neutral-600">

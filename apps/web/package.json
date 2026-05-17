@@ -13,13 +13,17 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "1.6.11",
     "@opennextjs/cloudflare": "1.19.10",
     "@xreviews/config": "workspace:*",
+    "@xreviews/db": "workspace:*",
     "@xreviews/shared": "workspace:*",
     "@xreviews/validators": "workspace:*",
+    "better-auth": "1.6.11",
     "next": "16.2.6",
     "react": "19.2.6",
     "react-dom": "19.2.6",
+    "resend": "6.12.3",
     "zod": "4.4.3"
   },
   "devDependencies": {

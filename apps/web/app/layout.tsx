@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { ObservabilityPlaceholders } from "@/components/observability-placeholders";
+import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,6 +22,7 @@ export default function RootLayout({
     <html lang="ko">
       <body>
         <ObservabilityPlaceholders />
+        <SiteHeader />
         {children}
       </body>
     </html>
