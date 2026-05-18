@@ -7,6 +7,7 @@ import {
 } from "@xreviews/validators";
 import { createReviewAction } from "@/app/subjects/[slug]/reviews/actions";
 import { EvidenceUploadField } from "@/app/subjects/[slug]/reviews/evidence-upload-field";
+import { recordAnalyticsEvent } from "@/server/analytics";
 import { getSubjectBySlugOrId, getSubjectRiskTags } from "@/server/subjects";
 import { requireUser } from "@/server/session";
 
@@ -45,7 +46,11 @@ export default async function NewReviewPage({
   params,
   searchParams
 }: NewReviewPageProps) {
-  const [{ slug }, query] = await Promise.all([params, searchParams, requireUser()]);
+  const [{ slug }, query, session] = await Promise.all([
+    params,
+    searchParams,
+    requireUser()
+  ]);
   const subject = await getSubjectBySlugOrId(slug);
 
   if (!subject || subject.status !== "active") {
@@ -56,6 +61,20 @@ export default async function NewReviewPage({
   const parsedQuery = reviewActionSearchParamsSchema.safeParse(query ?? {});
   const error = parsedQuery.success ? parsedQuery.data.error : undefined;
   const action = createReviewAction.bind(null, subject.slug, subject.id);
+
+  recordAnalyticsEvent(
+    "review_started",
+    {
+      subjectId: subject.id,
+      category: subject.category
+    },
+    {
+      actorUserId: session.user.id,
+      actorRole: session.user.role
+    }
+  ).catch((analyticsError: unknown) => {
+    console.error("[Xreviews analytics] Failed to record review_started", analyticsError);
+  });
 
   return (
     <main className="min-h-screen bg-paper text-ink">

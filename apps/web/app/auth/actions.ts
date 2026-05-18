@@ -4,6 +4,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth, isAuthDatabaseConfigured } from "@/lib/auth";
+import { captureAppError } from "@/lib/observability";
+import { recordAnalyticsEvent } from "@/server/analytics";
 
 const emailSchema = z.string().trim().email();
 
@@ -29,6 +31,7 @@ export async function requestMagicLink(formData: FormData) {
   const appUrl = getAppUrl();
 
   try {
+    await recordAnalyticsEvent("login_started", {});
     await auth.api.signInMagicLink({
       body: {
         email: parsedEmail.data,
@@ -39,6 +42,10 @@ export async function requestMagicLink(formData: FormData) {
       headers: await headers()
     });
   } catch (error) {
+    await captureAppError(error, {
+      area: "auth",
+      action: "request_magic_link"
+    });
     console.error("[Xreviews auth] Failed to request magic link", error);
     redirect("/login?error=magic-link");
   }
@@ -52,6 +59,10 @@ export async function signOut() {
       headers: await headers()
     });
   } catch (error) {
+    await captureAppError(error, {
+      area: "auth",
+      action: "sign_out"
+    });
     console.error("[Xreviews auth] Failed to sign out", error);
   }
 

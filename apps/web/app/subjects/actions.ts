@@ -9,6 +9,7 @@ import {
   createSubject,
   DatabaseUnavailableError
 } from "@/server/subjects";
+import { captureAppError } from "@/lib/observability";
 import { requireUser, USER_ROLES, type UserRole } from "@/server/session";
 
 function normalizeRole(value: unknown): UserRole {
@@ -53,6 +54,13 @@ export async function createSubjectAction(formData: FormData) {
       redirect("/subjects/new?error=database");
     }
 
+    await captureAppError(error, {
+      area: "subjects",
+      action: "create_subject",
+      extra: {
+        category: parsed.data.category
+      }
+    });
     console.error("[Xreviews subjects] Failed to create subject", error);
     redirect("/subjects/new?error=create");
   }

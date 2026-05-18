@@ -10,6 +10,7 @@ import {
   users
 } from "@xreviews/db/schema";
 import { CATEGORY_LABELS } from "@xreviews/shared/constants";
+import { recordAnalyticsEvent } from "@/server/analytics";
 import { tryGetServerDb } from "@/server/db";
 import { createEvidenceReadUrl, R2ConfigurationError } from "@/server/r2";
 
@@ -44,6 +45,12 @@ export class AdminModerationError extends Error {
   constructor(code: ModerationErrorCode, message: string) {
     super(message);
     this.code = code;
+  }
+}
+
+function assertAdminActor(actor: AdminActor) {
+  if (actor.role !== "admin") {
+    throw new AdminModerationError("forbidden", "Admin role is required.");
   }
 }
 
@@ -428,6 +435,7 @@ export async function updateReviewModerationStatus(
   input: ModerationInput,
   actor: AdminActor
 ) {
+  assertAdminActor(actor);
   const db = getAdminDb();
   const [currentReview] = await db
     .select({
@@ -494,6 +502,26 @@ export async function updateReviewModerationStatus(
     }
   });
 
+  await recordAnalyticsEvent(
+    "moderation_action_taken",
+    {
+      reviewId: currentReview.id,
+      subjectId: currentReview.subjectId,
+      previousStatus,
+      nextStatus,
+      action
+    },
+    {
+      actorUserId: actor.userId,
+      actorRole: "admin"
+    }
+  ).catch((error: unknown) => {
+    console.error(
+      "[Xreviews analytics] Failed to record moderation_action_taken",
+      error
+    );
+  });
+
   return {
     reviewId: updatedReview.id,
     previousStatus,
@@ -507,6 +535,7 @@ export async function getAdminEvidenceSignedReadUrl(input: {
   evidenceId: string;
   actor: AdminActor;
 }) {
+  assertAdminActor(input.actor);
   const db = getAdminDb();
   const [evidence] = await db
     .select({

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { ObservabilityPlaceholders } from "@/components/observability-placeholders";
 import { SiteHeader } from "@/components/site-header";
+import { initializeSentry } from "@/lib/observability";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,8 +19,10 @@ export default function RootLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
+  initializeSentry();
+
   return (
-    <html lang="ko">
+    <html data-scroll-behavior="smooth" lang="ko">
       <body>
         <ObservabilityPlaceholders />
         <SiteHeader />

@@ -6,8 +6,13 @@ import {
   whyXreviews
 } from "@xreviews/shared/copy";
 import { PRODUCT_RULES } from "@xreviews/shared/constants";
+import { getTopRiskSubjects } from "@/server/risk-score";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const topRiskSubjects = await getTopRiskSubjects({ limit: 3 });
+
   return (
     <main className="min-h-screen bg-paper text-ink">
       <section className="mx-auto grid min-h-[calc(100vh-84px)] w-full max-w-6xl content-center px-5 pb-16 pt-10 sm:px-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14">
@@ -115,6 +120,79 @@ export default function HomePage() {
               </p>
             </Link>
           ))}
+        </div>
+      </section>
+
+      <section className="border-y border-line bg-bone">
+        <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
+          <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <p className="text-sm font-black uppercase text-neutral-500">
+                X-risk rankings
+              </p>
+              <h2 className="mt-3 text-3xl font-black">
+                지금 가장 많이 쌓인 불만
+              </h2>
+              <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-neutral-700">
+                사람들은 리뷰를 볼 때 1점부터 봅니다. Xreviews는 그 이유를
+                모읍니다.
+              </p>
+            </div>
+            <Link
+              className="inline-flex h-12 items-center justify-center border border-ink px-6 text-sm font-bold transition hover:bg-ink hover:text-paper"
+              href="/rankings"
+            >
+              랭킹 보기
+            </Link>
+          </div>
+
+          {topRiskSubjects.length > 0 ? (
+            <div className="grid gap-4 md:grid-cols-3">
+              {topRiskSubjects.map((subject) => (
+                <Link
+                  className="min-h-60 border border-line bg-paper p-5 transition hover:border-ink"
+                  href={`/subjects/${encodeURIComponent(subject.slug)}`}
+                  key={subject.id}
+                >
+                  <p className="text-xs font-black uppercase text-neutral-500">
+                    {subject.categoryLabel}
+                  </p>
+                  <div className="mt-5 flex items-start justify-between gap-4">
+                    <h3 className="text-2xl font-black leading-tight">
+                      {subject.name}
+                    </h3>
+                    <div className="border border-line px-3 py-2 text-right">
+                      <p className="text-xs font-black uppercase text-neutral-500">
+                        X-risk
+                      </p>
+                      <p className="text-2xl font-black">{subject.score}</p>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-sm font-bold leading-6 text-neutral-600">
+                    {subject.breakdown.publishedComplaintCount}건 공개 불만 ·{" "}
+                    {subject.breakdown.evidenceBackedCount}건 증거 신호
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {subject.topRiskTags.slice(0, 3).map((tag) => (
+                      <span
+                        className="border border-line px-2 py-1 text-xs font-black text-neutral-600"
+                        key={tag.id}
+                      >
+                        {tag.labelKo} {tag.count}회
+                      </span>
+                    ))}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="border border-line bg-paper p-6">
+              <p className="text-base font-bold leading-7 text-neutral-700">
+                공개 승인된 불만이 쌓이면 랭킹이 표시됩니다. pending 상태의
+                불만은 랭킹에 반영하지 않습니다.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 

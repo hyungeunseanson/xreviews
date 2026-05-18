@@ -41,6 +41,12 @@ export default async function AdminReviewsPage({
     <main className="min-h-screen bg-paper text-ink">
       <section className="border-b border-line bg-bone">
         <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8">
+          <Link
+            className="text-sm font-bold text-neutral-600 underline underline-offset-4 transition hover:text-ink"
+            href="/admin/business-claims"
+          >
+            공식 계정 신청 큐
+          </Link>
           <p className="text-sm font-black uppercase text-neutral-500">
             Admin moderation
           </p>

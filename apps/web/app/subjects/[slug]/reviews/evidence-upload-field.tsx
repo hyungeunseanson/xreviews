@@ -8,6 +8,7 @@ import {
   type EvidenceType
 } from "@xreviews/validators";
 import { createEvidenceUploadIntentAction } from "@/app/subjects/[slug]/reviews/evidence-actions";
+import { getFileSizeRange, trackAnalyticsEvent } from "@/lib/analytics";
 
 type UploadedEvidence = {
   id: string;
@@ -71,6 +72,10 @@ export function EvidenceUploadField() {
     formData.set("fileSizeBytes", String(file.size));
     formData.set("evidenceType", selectedEvidenceType);
     setMessage(null);
+    trackAnalyticsEvent("evidence_upload_started", {
+      evidenceType: selectedEvidenceType,
+      fileSizeRange: getFileSizeRange(file.size)
+    });
 
     startTransition(async () => {
       const result = await createEvidenceUploadIntentAction(formData);
@@ -92,6 +97,11 @@ export function EvidenceUploadField() {
         setMessage("R2 업로드에 실패했습니다. 잠시 뒤 다시 시도해주세요.");
         return;
       }
+
+      trackAnalyticsEvent("evidence_uploaded", {
+        evidenceType: result.evidence.evidenceType,
+        fileSizeRange: getFileSizeRange(result.evidence.fileSizeBytes)
+      });
 
       setUploadedEvidence((current) => [
         ...current,

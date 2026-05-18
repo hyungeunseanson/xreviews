@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getPublicBusinessAreaForSubject } from "@/server/business";
+import { recordAnalyticsEvent } from "@/server/analytics";
+import { getSubjectRiskOverview } from "@/server/risk-score";
 import { getPublishedReviewsBySubject } from "@/server/reviews";
 import { getSubjectBySlugOrId, getSubjectRiskTags } from "@/server/subjects";
 
@@ -27,10 +30,27 @@ export default async function SubjectDetailPage({
     notFound();
   }
 
-  const [riskTags, publishedReviews] = await Promise.all([
+  const [riskTags, publishedReviews, riskOverview] = await Promise.all([
     getSubjectRiskTags(subject.category),
-    getPublishedReviewsBySubject(subject.id)
+    getPublishedReviewsBySubject(subject.id),
+    getSubjectRiskOverview(subject.id)
   ]);
+  const businessArea = await getPublicBusinessAreaForSubject({
+    subjectId: subject.id,
+    reviewIds: publishedReviews.map((review) => review.id)
+  });
+  const officialProfile = businessArea.profile?.officialBadgeEnabled
+    ? businessArea.profile
+    : null;
+  const repeatedRiskTags = riskOverview?.topRiskTags ?? [];
+
+  recordAnalyticsEvent("subject_viewed", {
+    subjectId: subject.id,
+    category: subject.category,
+    status: subject.status
+  }).catch((error: unknown) => {
+    console.error("[Xreviews analytics] Failed to record subject_viewed", error);
+  });
 
   return (
     <main className="min-h-screen bg-paper text-ink">
@@ -56,7 +76,7 @@ export default async function SubjectDetailPage({
           <p className="text-sm font-black uppercase text-neutral-500">
             {subject.category}
           </p>
-          <div className="mt-5 grid gap-8 lg:grid-cols-[1fr_280px] lg:items-end">
+          <div className="mt-5 grid gap-8 lg:grid-cols-[1fr_300px] lg:items-end">
             <div>
               <h1 className="text-5xl font-black leading-tight">
                 {subject.name}
@@ -70,16 +90,31 @@ export default async function SubjectDetailPage({
                 </p>
               ) : null}
             </div>
-            <div className="border border-line bg-paper p-5">
-              <p className="text-sm font-black uppercase text-neutral-500">
-                X-risk score
-              </p>
-              <p className="mt-4 text-5xl font-black">
-                {subject.riskScore ?? "준비 중"}
-              </p>
-              <p className="mt-3 text-sm font-semibold leading-6 text-neutral-600">
-                공개 불만과 반복 제보가 쌓이면 계산됩니다.
-              </p>
+            <div className="grid gap-3">
+              <div className="border border-line bg-paper p-5">
+                <p className="text-sm font-black uppercase text-neutral-500">
+                  X-risk score
+                </p>
+                <p className="mt-4 text-4xl font-black">
+                  {riskOverview?.score ?? 0}
+                </p>
+                <p className="mt-3 text-sm font-semibold leading-6 text-neutral-600">
+                  별점이 아니라 공개 불만 기반 리스크 신호입니다.
+                </p>
+              </div>
+              <div className="border border-line bg-paper p-5">
+                <p className="text-sm font-black uppercase text-neutral-500">
+                  Official status
+                </p>
+                <p className="mt-4 text-2xl font-black">
+                  {officialProfile ? "공식 인증 사업자" : "공식 계정 미인증"}
+                </p>
+                <p className="mt-3 text-sm font-semibold leading-6 text-neutral-600">
+                  {officialProfile
+                    ? "이 업체는 Xreviews에서 공식 계정을 인증했습니다."
+                    : "공식 계정은 아직 인증되지 않았습니다."}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -91,24 +126,67 @@ export default async function SubjectDetailPage({
             <div className="mb-4 flex items-center justify-between gap-4">
               <h2 className="text-2xl font-black">반복 제보 태그</h2>
               <p className="text-sm font-bold text-neutral-500">
-                Phase 3 placeholder
+                published 불만 기준
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              {riskTags.map((tag) => (
-                <span
-                  className="border border-line px-3 py-2 text-sm font-bold text-neutral-700"
-                  key={tag.id}
-                >
-                  {tag.labelKo}
-                </span>
-              ))}
-              {riskTags.length === 0 ? (
+              {repeatedRiskTags.length > 0
+                ? repeatedRiskTags.map((tag) => (
+                    <span
+                      className="border border-line px-3 py-2 text-sm font-bold text-neutral-700"
+                      key={tag.id}
+                    >
+                      {tag.labelKo} {tag.count}회
+                    </span>
+                  ))
+                : riskTags.map((tag) => (
+                    <span
+                      className="border border-line px-3 py-2 text-sm font-bold text-neutral-700"
+                      key={tag.id}
+                    >
+                      {tag.labelKo}
+                    </span>
+                  ))}
+              {riskTags.length === 0 && repeatedRiskTags.length === 0 ? (
                 <p className="text-sm font-semibold leading-6 text-neutral-600">
                   카테고리별 위험 태그 seed가 필요합니다.
                 </p>
               ) : null}
+              {riskTags.length > 0 && repeatedRiskTags.length === 0 ? (
+                <p className="basis-full text-sm font-semibold leading-6 text-neutral-600">
+                  아직 반복 제보가 충분하지 않아 카테고리 제보 유형을 먼저
+                  보여줍니다.
+                </p>
+              ) : null}
             </div>
+          </section>
+
+          <section className="grid gap-4 sm:grid-cols-4">
+            {[
+              {
+                label: "공개 불만",
+                value: riskOverview?.breakdown.publishedComplaintCount ?? 0
+              },
+              {
+                label: "증거 신호",
+                value: riskOverview?.breakdown.evidenceBackedCount ?? 0
+              },
+              {
+                label: "공식 답변",
+                value: riskOverview?.breakdown.businessResponseCount ?? 0
+              },
+              {
+                label: "개선 보고",
+                value: riskOverview?.breakdown.improvementPostCount ?? 0
+              }
+            ].map((item) => (
+              <div className="border border-line p-4" key={item.label}>
+                <p className="text-xs font-black uppercase text-neutral-500">
+                  {item.label}
+                </p>
+                <p className="mt-2 text-3xl font-black">{item.value}</p>
+              </div>
+            ))}
           </section>
 
           <section className="border border-line p-6">
@@ -149,10 +227,54 @@ export default async function SubjectDetailPage({
                       문제 강도 {review.severityScore} · 증거 수준{" "}
                       {review.evidenceLevel}
                     </p>
+                    {businessArea.responsesByReviewId.get(review.id)?.map(
+                      (response) => (
+                        <div
+                          className="mt-5 border-l-4 border-ink bg-bone px-4 py-3"
+                          key={response.id}
+                        >
+                          <p className="text-sm font-black">
+                            사업자 공식 답변
+                          </p>
+                          <p className="mt-1 text-xs font-bold uppercase text-neutral-500">
+                            {response.responseTypeLabel} · 이 답변은 승인된 공식
+                            계정이 작성했습니다.
+                          </p>
+                          <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-6 text-neutral-700">
+                            {response.body}
+                          </p>
+                        </div>
+                      )
+                    )}
                   </article>
                 ))}
               </div>
             )}
+          </section>
+
+          <section className="border border-line p-6">
+            <h2 className="text-2xl font-black">사업자 개선 보고</h2>
+            <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-neutral-700">
+              불만 이후 어떤 점을 개선했는지 사업자가 직접 남긴 내용입니다.
+            </p>
+            <div className="mt-5 divide-y divide-line border-y border-line">
+              {businessArea.improvementPosts.map((post) => (
+                <article className="py-5" key={post.id}>
+                  <p className="text-xs font-black uppercase text-neutral-500">
+                    {post.categoryLabel}
+                  </p>
+                  <h3 className="mt-2 text-xl font-black">{post.title}</h3>
+                  <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-6 text-neutral-700">
+                    {post.body}
+                  </p>
+                </article>
+              ))}
+              {businessArea.improvementPosts.length === 0 ? (
+                <p className="py-6 text-sm font-bold text-neutral-600">
+                  아직 공개된 개선 보고가 없습니다.
+                </p>
+              ) : null}
+            </div>
           </section>
         </div>
 
@@ -162,12 +284,23 @@ export default async function SubjectDetailPage({
               Official account
             </p>
             <p className="mt-4 text-xl font-black">
-              {subject.officialBadgeEnabled ? "공식 계정 인증됨" : "공식 계정 미인증"}
+              {officialProfile ? "공식 인증 사업자" : "공식 계정 미인증"}
             </p>
             <p className="mt-3 text-sm font-semibold leading-6 text-neutral-600">
-              사업자 공식 계정 기능은 이후 Phase에서 연결합니다.
+              {officialProfile
+                ? "이 배지는 서비스 품질 보증이 아니라 공식 계정 인증입니다."
+                : "불만이 쌓이고 있습니다. 공식 입장을 등록하세요."}
             </p>
           </div>
+
+          {officialProfile ? null : (
+            <Link
+              className="inline-flex h-12 w-full items-center justify-center border border-ink px-6 text-sm font-bold transition hover:bg-ink hover:text-paper"
+              href={`/subjects/${encodeURIComponent(subject.slug)}/claim`}
+            >
+              이 업체의 공식 계정 신청
+            </Link>
+          )}
 
           <Link
             className="inline-flex h-12 w-full items-center justify-center bg-ink px-6 text-sm font-bold text-paper transition hover:bg-neutral-800"

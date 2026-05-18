@@ -1,3 +1,4 @@
+import { recordAnalyticsEvent } from "@/server/analytics";
 import { requireUser } from "@/server/session";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,17 @@ type AccountPageProps = {
 export default async function AccountPage({ searchParams }: AccountPageProps) {
   const [session, params] = await Promise.all([requireUser(), searchParams]);
   const role = session.user.role;
+
+  recordAnalyticsEvent(
+    "login_completed",
+    {},
+    {
+      actorUserId: session.user.id,
+      actorRole: role === "business" || role === "admin" ? role : "user"
+    }
+  ).catch((error: unknown) => {
+    console.error("[Xreviews analytics] Failed to record login_completed", error);
+  });
 
   return (
     <main className="min-h-[calc(100vh-73px)] bg-paper text-ink">

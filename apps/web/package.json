@@ -17,6 +17,7 @@
     "@aws-sdk/s3-request-presigner": "^3.1048.0",
     "@better-auth/drizzle-adapter": "1.6.11",
     "@opennextjs/cloudflare": "1.19.10",
+    "@sentry/core": "^10.53.1",
     "@xreviews/config": "workspace:*",
     "@xreviews/db": "workspace:*",
     "@xreviews/shared": "workspace:*",

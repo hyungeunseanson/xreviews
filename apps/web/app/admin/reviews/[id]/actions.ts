@@ -5,6 +5,7 @@ import {
   AdminModerationError,
   updateReviewModerationStatus
 } from "@/server/admin/moderation";
+import { captureAppError } from "@/lib/observability";
 import { requireAdmin } from "@/server/session";
 
 type ModerationActionName = "approve" | "dispute" | "hide" | "remove";
@@ -43,6 +44,13 @@ async function runModerationAction(
       redirect(getAdminReviewPath(reviewId, `error-${error.code}`));
     }
 
+    await captureAppError(error, {
+      area: "admin",
+      action: "moderate_review",
+      extra: {
+        reviewId
+      }
+    });
     console.error("[Xreviews admin] Failed to update review status", error);
     redirect(getAdminReviewPath(reviewId, "error-update"));
   }

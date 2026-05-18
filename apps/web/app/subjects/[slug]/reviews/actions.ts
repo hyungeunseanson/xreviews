@@ -6,6 +6,7 @@ import {
   createReviewInputSchema,
   type ReviewActionError
 } from "@xreviews/validators";
+import { captureAppError } from "@/lib/observability";
 import { createReview, ReviewWriteError } from "@/server/reviews";
 import { requireUser, USER_ROLES, type UserRole } from "@/server/session";
 
@@ -72,6 +73,15 @@ export async function createReviewAction(
       redirect(getNewReviewPath(subjectSlug, error.code));
     }
 
+    await captureAppError(error, {
+      area: "reviews",
+      action: "create_review",
+      extra: {
+        subjectId,
+        riskTagCount: riskTagIds.length,
+        evidenceCount: evidenceIds.length
+      }
+    });
     console.error("[Xreviews reviews] Failed to create review", error);
     redirect(getNewReviewPath(subjectSlug, "create"));
   }

@@ -4,8 +4,10 @@ import { getCurrentSession } from "@/server/session";
 
 const navItems = [
   { label: "검색", href: "/subjects" },
+  { label: "랭킹", href: "/rankings" },
   { label: "카테고리", href: "/#categories" },
   { label: "대상 등록", href: "/subjects/new" },
+  { label: "공식계정", href: "/business" },
   { label: "원칙", href: "/#product-rules" }
 ] as const;
 

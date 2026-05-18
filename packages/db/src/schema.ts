@@ -510,9 +510,11 @@ export const businessClaims = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     businessName: text("business_name").notNull(),
+    applicantName: text("applicant_name").notNull().default(""),
     registrationNumber: text("registration_number"),
     contactEmail: text("contact_email").notNull(),
     contactPhone: text("contact_phone"),
+    verificationNote: text("verification_note"),
     status: businessClaimStatusEnum("status").notNull().default("pending"),
     adminNote: text("admin_note"),
     ...timestamps

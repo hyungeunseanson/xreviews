@@ -29,6 +29,7 @@ import type {
   SubjectSearchInput
 } from "@xreviews/validators";
 import { createSubjectInputSchema, subjectSearchInputSchema } from "@xreviews/validators";
+import { recordAnalyticsEvent } from "@/server/analytics";
 import { getServerDb, tryGetServerDb } from "@/server/db";
 import type { UserRole } from "@/server/session";
 
@@ -211,7 +212,7 @@ async function recordSearchEvent(
   }
 
   await db.insert(searchEvents).values({
-    query: input.q ?? "",
+    query: input.q ? "[query_present]" : "",
     category: input.category,
     resultCount
   });
@@ -283,6 +284,21 @@ export async function createSubject(
     }
   });
 
+  await recordAnalyticsEvent(
+    "subject_created",
+    {
+      subjectId: createdSubject.id,
+      category: input.category,
+      status: createdSubject.status
+    },
+    {
+      actorUserId: actor.userId,
+      actorRole: actor.role
+    }
+  ).catch((error: unknown) => {
+    console.error("[Xreviews analytics] Failed to record subject_created", error);
+  });
+
   return {
     status: "created",
     subject: toSubjectSummary({
@@ -346,6 +362,13 @@ export async function searchSubjects(
 
   await recordSearchEvent(db, input, items.length).catch((error: unknown) => {
     console.error("[Xreviews subjects] Failed to record search event", error);
+  });
+  await recordAnalyticsEvent("search_performed", {
+    category: input.category ?? "all",
+    queryPresent: Boolean(query),
+    resultCount: items.length
+  }).catch((error: unknown) => {
+    console.error("[Xreviews analytics] Failed to record search_performed", error);
   });
 
   return {

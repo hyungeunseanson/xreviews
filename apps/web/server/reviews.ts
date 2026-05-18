@@ -22,6 +22,7 @@ import {
   POSITIVE_REVIEW_BLOCK_MESSAGE,
   type CreateReviewInput
 } from "@xreviews/validators";
+import { recordAnalyticsEvent } from "@/server/analytics";
 import { getServerDb, tryGetServerDb } from "@/server/db";
 import {
   attachEvidenceToReview,
@@ -155,6 +156,24 @@ export async function createReview(
   });
 
   if (!complaintCheck.accepted) {
+    await recordAnalyticsEvent(
+      "positive_review_blocked",
+      {
+        subjectId: subject.id,
+        category: subject.category,
+        riskTagCount: input.riskTagIds.length
+      },
+      {
+        actorUserId: actor.userId,
+        actorRole: actor.role
+      }
+    ).catch((error: unknown) => {
+      console.error(
+        "[Xreviews analytics] Failed to record positive_review_blocked",
+        error
+      );
+    });
+
     throw new ReviewWriteError("positive", POSITIVE_REVIEW_BLOCK_MESSAGE);
   }
 
@@ -168,6 +187,24 @@ export async function createReview(
     });
 
     if (!medicalCheck.accepted) {
+      await recordAnalyticsEvent(
+        "medical_guardrail_blocked",
+        {
+          subjectId: subject.id,
+          category: "medical_clinic",
+          riskTagCount: input.riskTagIds.length
+        },
+        {
+          actorUserId: actor.userId,
+          actorRole: actor.role
+        }
+      ).catch((error: unknown) => {
+        console.error(
+          "[Xreviews analytics] Failed to record medical_guardrail_blocked",
+          error
+        );
+      });
+
       throw new ReviewWriteError("medical", MEDICAL_GUARDRAIL_MESSAGE);
     }
   }
@@ -258,6 +295,24 @@ export async function createReview(
 
     throw error;
   }
+
+  await recordAnalyticsEvent(
+    "review_submitted",
+    {
+      subjectId: subject.id,
+      reviewId: createdReview.id,
+      category: subject.category,
+      status: "pending",
+      riskTagCount: input.riskTagIds.length,
+      evidenceCount: input.evidenceIds.length
+    },
+    {
+      actorUserId: actor.userId,
+      actorRole: actor.role
+    }
+  ).catch((error: unknown) => {
+    console.error("[Xreviews analytics] Failed to record review_submitted", error);
+  });
 
   return {
     reviewId: createdReview.id,

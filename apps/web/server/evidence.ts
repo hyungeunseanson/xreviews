@@ -4,6 +4,8 @@ import {
   createEvidenceUploadIntentInputSchema,
   type EvidenceMetadataInput
 } from "@xreviews/validators";
+import { getFileSizeRange } from "@/lib/analytics/events";
+import { recordAnalyticsEvent } from "@/server/analytics";
 import { getServerDb, tryGetServerDb } from "@/server/db";
 import {
   createEvidenceObjectKey,
@@ -80,6 +82,23 @@ export async function createEvidenceUploadIntent(
     const { uploadUrl, expiresInSeconds } = await createEvidenceUploadUrl({
       objectKey,
       fileType: input.fileType
+    });
+
+    await recordAnalyticsEvent(
+      "evidence_upload_started",
+      {
+        evidenceType: input.evidenceType,
+        fileSizeRange: getFileSizeRange(input.fileSizeBytes)
+      },
+      {
+        actorUserId: actor.userId,
+        actorRole: actor.role
+      }
+    ).catch((error: unknown) => {
+      console.error(
+        "[Xreviews analytics] Failed to record evidence_upload_started",
+        error
+      );
     });
 
     return {
@@ -164,6 +183,20 @@ export async function createReviewEvidenceMetadata(
   if (!createdEvidence) {
     throw new EvidenceWriteError("metadata", "Evidence metadata was not saved.");
   }
+
+  await recordAnalyticsEvent(
+    "evidence_uploaded",
+    {
+      evidenceType: input.metadata.evidenceType,
+      fileSizeRange: getFileSizeRange(input.metadata.fileSizeBytes)
+    },
+    {
+      actorUserId: actor.userId,
+      actorRole: actor.role
+    }
+  ).catch((error: unknown) => {
+    console.error("[Xreviews analytics] Failed to record evidence_uploaded", error);
+  });
 
   return toClientEvidence(createdEvidence);
 }

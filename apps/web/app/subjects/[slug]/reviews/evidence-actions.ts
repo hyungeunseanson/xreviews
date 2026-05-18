@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { captureAppError } from "@/lib/observability";
 import { createEvidenceUploadSession, EvidenceWriteError } from "@/server/evidence";
 import { requireUser, USER_ROLES, type UserRole } from "@/server/session";
 
@@ -58,6 +59,13 @@ export async function createEvidenceUploadIntentAction(formData: FormData) {
       }
     };
   } catch (error) {
+    if (!(error instanceof EvidenceWriteError) && !(error instanceof z.ZodError)) {
+      await captureAppError(error, {
+        area: "evidence",
+        action: "create_upload_intent"
+      });
+    }
+
     return {
       status: "error" as const,
       message: getEvidenceErrorMessage(error)

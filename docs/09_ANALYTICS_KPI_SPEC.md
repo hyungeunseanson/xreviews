@@ -5,7 +5,7 @@
 - GA4 for traffic/acquisition/product events
 - Microsoft Clarity for heatmaps/session replay UX learning
 - Sentry for errors/performance
-- Internal `analytics_events` table for core product metrics
+- Internal `search_events`, `share_events`, and sanitized `audit_logs` metadata for core product metrics
 
 ## North Star Metric
 
@@ -18,17 +18,21 @@ Verified risk-avoidance actions.
 | search_performed | User submits search |
 | subject_viewed | User opens subject page |
 | review_started | User opens new review form |
-| review_positive_blocked | Positive/praise-only content blocked |
+| subject_created | Logged-in user creates subject |
+| positive_review_blocked | Positive/praise-only content blocked |
+| medical_guardrail_blocked | Medical category safety copy blocks unsafe claim |
 | review_submitted | Review submitted pending moderation |
 | evidence_upload_started | Upload URL created |
-| evidence_uploaded | Evidence metadata saved |
+| evidence_uploaded | Evidence metadata saved after private upload |
 | business_claim_started | Claim form opened |
 | business_claim_submitted | Claim submitted |
-| business_reply_submitted | Business reply posted |
-| improvement_post_created | Improvement post created |
-| legal_request_submitted | Legal/takedown request submitted |
+| business_response_created | Business official response posted |
+| business_improvement_post_created | Improvement post created |
+| moderation_action_taken | Admin moderation status action |
 | ranking_viewed | Ranking page viewed |
-| share_clicked | User shares subject/review |
+| ranking_subject_clicked | User opens subject from ranking |
+| login_started | Magic link requested |
+| login_completed | Authenticated account page reached |
 
 ## KPI dashboard
 
@@ -55,7 +59,7 @@ Verified risk-avoidance actions.
   "subject_id": "uuid",
   "properties": {
     "category": "medical_clinic",
-    "risk_score": 82,
+    "scoreRange": "81-100",
     "source": "search"
   }
 }
@@ -63,6 +67,6 @@ Verified risk-avoidance actions.
 
 ## Privacy
 
-Do not send sensitive review body or evidence filenames to GA4/Clarity.
+Do not send sensitive review body, evidence filenames, evidence object keys, upload URLs, signed URLs, public evidence URLs, raw emails, or raw phone numbers to GA4/Clarity/Sentry.
 
-Use internal analytics table for product events and sanitize PII.
+Use allowlisted payload keys only. Store search query presence/result count instead of raw sensitive search text when possible.
