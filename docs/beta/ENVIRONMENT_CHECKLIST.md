@@ -68,6 +68,8 @@ Local blanks are acceptable for Resend mock mode and disabled observability/anal
 - [ ] Clarity project set or intentionally blank
 - [ ] `.env.local` is not tracked
 - [ ] Staging secrets registered through Wrangler/Cloudflare dashboard
+- [ ] Cloudflare build runs without `.env.local` present in the repo
+- [ ] Build-time public env values are provided separately from runtime secrets
 
 ## 5. Production checklist
 
@@ -81,4 +83,3 @@ Local blanks are acceptable for Resend mock mode and disabled observability/anal
 - [ ] Admin account created and protected
 - [ ] Legal/ops contacts replaced with real monitored inboxes
 - [ ] Closed beta findings reviewed before public launch
-

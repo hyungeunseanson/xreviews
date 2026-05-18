@@ -117,6 +117,22 @@ For public env values, prefer Cloudflare dashboard vars or config-managed vars. 
 
 Never commit `.env.local` or real secrets.
 
+When building for Cloudflare, do not run `opennextjs-cloudflare build` with a
+real `.env.local` file in place. Next/OpenNext can read local env files during
+the production build, which may copy local secret values into generated build
+artifacts. Before a staging/production build, move `.env.local` outside the repo
+or build in a clean CI environment, then provide only build-time public values:
+
+```bash
+NEXT_PUBLIC_APP_URL=https://your-domain.example \
+NEXT_PUBLIC_GA_MEASUREMENT_ID= \
+NEXT_PUBLIC_CLARITY_PROJECT_ID= \
+pnpm cf:build
+```
+
+Server-side secret values must come from Cloudflare secrets or protected runtime
+variables, not from `.env.local` baked into the bundle.
+
 ## Environment matrix
 
 Use the full checklist in `docs/beta/ENVIRONMENT_CHECKLIST.md`.
